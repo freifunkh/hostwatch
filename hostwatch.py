@@ -7,6 +7,8 @@ import os.path
 import subprocess
 import xml.etree.ElementTree as ET
 
+import AtomFeed
+
 ### Settings in code... 'cause I'm lazy. ###
 gHostsJSON = '/home/moridius/scripts/hostwatch/hosts.json'
 gFeedFolder = '/home/moridius/scripts/hostwatch/feeds/'
@@ -36,51 +38,20 @@ def UpdateFeed( name, online ):
     feed_file = gFeedFolder + name + '.atom'
     url = gURL + feed_file + '/'
 
-    ET.register_namespace( '', 'http://www.w3.org/2005/Atom' )
-    ns = {'atom': 'http://www.w3.org/2005/Atom'}
-    root = None
+    feed = None
     if os.path.exists( feed_file ):
-        tree = ET.parse( feed_file )
-        root = tree.getroot()
+        feed = AtomFeed( filePath=feed_file )
     else:
-        root = ET.fromstring( '<?xml version="1.0"?>\n<feed xmlns="http://www.w3.org/2005/Atom"><title>hostwatch: ' + name + '</title><author><name>hostwatch</name></author><updated>2000–01–01T00:00:00Z</updated><link rel="alternate" href="http://127.0.0.1/hostwatch"/></feed>' )
+        feed = AtomFeed( title='hostwatch: ' + name, author='hostwatch', link='htto://moridius.ffh' )
 
-    # delete old entries
-    id_list = []
-    for entry in root.findall( 'atom:entry', ns ):
-        id_list.append( entry.find( 'atom:id', ns ).text )
-    id_list.sort()
-    del id_list[-2:]
-
-    for entry in root.findall( 'atom:entry', ns ):
-        if entry.find( 'atom:id', ns ).text in id_list:
-            root.remove( entry )
-
-    now = datetime.datetime.utcnow()
-    updated = now.strftime("%Y-%m-%dT%H:%M:%SZ")
-    entry_id = now.strftime("%Y%m%d%H%M%S")
-    updated_tag = root.find( 'atom:updated', ns )
-    updated_tag.text = updated
-
-    ne = ET.SubElement( root, 'entry' )
-
-    ne_title = ET.SubElement( ne, 'title' )
+    title = 'offline'
     if online:
-        ne_title.text = 'online'
-    else:
-        ne_title.text = 'offline'
+        title = 'online'
+    summary = '"' + name + '" ist jetzt ' + ne_title.text + '!'
 
-    ne_summary = ET.SubElement( ne, 'summary' )
-    ne_summary.text = '"' + name + '" ist jetzt ' + ne_title.text + '!'
+    feed.AddEntry( title=title, summary=summary )
 
-    ne_updated = ET.SubElement( ne, 'updated' )
-    ne_updated.text = updated
-
-    ne_id = ET.SubElement( ne, 'id' )
-    ne_id.text = url + entry_id
-    
-    with open( feed_file, 'w' ) as f:
-        f.write( ET.tostring( root, encoding="utf-8" ).decode() )
+    feed.WriteFile( feed_file )
 
 
 def ReadHosts():
