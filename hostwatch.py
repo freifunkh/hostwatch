@@ -17,40 +17,48 @@ gURL = 'http://127.0.0.1/hostwatch/'
 
 
 def Ping( address ):
-    r = subprocess.run( ["ping", "-W", "1", "-c", "1", address], stdout=subprocess.DEVNULL )
-    return ( r.returncode == 0 )
+    try:
+        r = subprocess.run( ["ping", "-W", "1", "-c", "1", address], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
+        return ( r.returncode == 0 )
+    except:
+        return False
 
 
 def PingAll( hosts ):
+    feed_file = gFeedFolder + '_all.atom'
+    feed = None
+    if os.path.exists( feed_file ):
+        feed = AtomFeed.AtomFeed( filePath=feed_file, maxEntries=100 )
+    else:
+        feed = AtomFeed.AtomFeed( title='hostwatch: all', author='hostwatch', link='htto://moridius.ffh', maxEntries=100 )
+
     for host in hosts:
-        if host['name'] == "carter":
-            continue # debugging
-        #new_status = not host['online']
         new_status = Ping( host['address'] )
         if new_status == True:
-            host['lastseen'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            host['lastchange'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         if new_status != host['online']:
             host['online'] = new_status
-            UpdateFeed( host['name'], host['online'] )
+            UpdateLocalFeed( host['name'], host['online'] )
+            title = ( 'Online' if new_status else 'Offline' ) + ': ' + host['name']
+            summary = '"' + host['name'] + '" ist jetzt ' + ( 'online' if new_status else 'offline' ) + '.'
+            feed.AddEntry( title=title, summary=summary )
+    feed.WriteFile( feed_file )
 
 
-def UpdateFeed( name, online ):
+def UpdateLocalFeed( name, online ):
     feed_file = gFeedFolder + name + '.atom'
     url = gURL + feed_file + '/'
 
     feed = None
     if os.path.exists( feed_file ):
-        feed = AtomFeed( filePath=feed_file )
+        feed = AtomFeed.AtomFeed( filePath=feed_file )
     else:
-        feed = AtomFeed( title='hostwatch: ' + name, author='hostwatch', link='htto://moridius.ffh' )
+        feed = AtomFeed.AtomFeed( title='hostwatch: ' + name, author='hostwatch', link='htto://moridius.ffh' )
 
-    title = 'offline'
-    if online:
-        title = 'online'
-    summary = '"' + name + '" ist jetzt ' + ne_title.text + '!'
+    title = 'online' if online else 'offline'
+    summary = '"' + name + '" ist jetzt ' + title + '!'
 
     feed.AddEntry( title=title, summary=summary )
-
     feed.WriteFile( feed_file )
 
 
@@ -60,7 +68,7 @@ def ReadHosts():
         with open( gHostsJSON, 'r' ) as f:
             hosts = json.load( f )
     else:
-        hosts = json.loads( '[{"lastseen": "2000-01-01T00:00:00Z", "online": false, "name": "localhost", "address": "127.0.0.1"}]' )
+        hosts = json.loads( '[{"lastchange": "2000-01-01T00:00:00Z", "online": false, "name": "localhost", "address": "127.0.0.1"}]' )
     return hosts
 
 
