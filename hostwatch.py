@@ -18,13 +18,13 @@ def Ping( address ):
         return False
 
 
-def PingAll( hosts, feedFolder ):
+def PingAll( hosts, feedFolder, url ):
     feed_file = feedFolder + '_all.atom'
     feed = None
     if os.path.exists( feed_file ):
         feed = AtomFeed.AtomFeed( filePath=feed_file, maxEntries=100 )
     else:
-        feed = AtomFeed.AtomFeed( title='hostwatch: all', author='hostwatch', link='http://moridius.ffh', maxEntries=100 )
+        feed = AtomFeed.AtomFeed( title='hostwatch: all', author='hostwatch', link=url, maxEntries=100 )
 
     for host in hosts:
         new_status = Ping( host['address'] )
@@ -46,7 +46,7 @@ def UpdateLocalFeed( name, online, feedFolder, url ):
     if os.path.exists( feed_file ):
         feed = AtomFeed.AtomFeed( filePath=feed_file )
     else:
-        feed = AtomFeed.AtomFeed( title='hostwatch: ' + name, author='hostwatch', link='http://moridius.ffh' )
+        feed = AtomFeed.AtomFeed( title='hostwatch: ' + name, author='hostwatch', link=url )
 
     title = 'online' if online else 'offline'
     summary = '"' + name + '" ist jetzt ' + title + '!'
@@ -75,5 +75,5 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read( config_path )
     hosts = ReadHosts( config['general']['HostsJSON'] )
-    PingAll( hosts, config['general']['FeedFolder'] )
+    PingAll( hosts, config['general']['FeedFolder'], config['general']['URL'] )
     WriteHosts( hosts, config['general']['HostsJSON'] )
