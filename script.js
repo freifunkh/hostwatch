@@ -32,5 +32,5 @@ function LoadData()
 window.addEventListener( 'load', function()
 {
     LoadData();
-    //setInterval( LoadData, 2000 );
+    setInterval( LoadData, 5000 );
 });

@@ -18,7 +18,7 @@ gURL = 'http://127.0.0.1/hostwatch/'
 
 def Ping( address ):
     try:
-        r = subprocess.run( ["ping", "-W", "1", "-c", "1", address], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
+        r = subprocess.run( ["ping6", "-W", "1", "-c", "1", address], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
         return ( r.returncode == 0 )
     except:
         return False
@@ -34,9 +34,8 @@ def PingAll( hosts ):
 
     for host in hosts:
         new_status = Ping( host['address'] )
-        if new_status == True:
-            host['lastchange'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         if new_status != host['online']:
+            host['lastchange'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             host['online'] = new_status
             UpdateLocalFeed( host['name'], host['online'] )
             title = ( 'Online' if new_status else 'Offline' ) + ': ' + host['name']
