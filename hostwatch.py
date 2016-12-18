@@ -31,7 +31,7 @@ def PingAll( hosts, feedFolder, url ):
         if new_status != host['online']:
             host['lastchange'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             host['online'] = new_status
-            UpdateLocalFeed( host['name'], host['online'], feedFolder )
+            UpdateLocalFeed( host['name'], host['online'], feedFolder, url )
             title = ( 'Online' if new_status else 'Offline' ) + ': ' + host['name']
             summary = '"' + host['name'] + '" ist jetzt ' + ( 'online' if new_status else 'offline' ) + '.'
             feed.AddEntry( title=title, summary=summary )
