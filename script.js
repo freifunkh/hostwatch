@@ -22,7 +22,7 @@ function LoadData()
             {
                 var status = data[i]['online'] ? "online" : "offline";
                 var last_change = new Date( data[i]['lastchange'] );
-                var html = "<tr><td>" + data[i]['name'] + "</td><td>" + status + "</td><td>" + Date2String( last_change ) + "</td></tr>";
+                var html = '<tr><td>' + data[i]['name'] + '</td><td class="' + status + '">' + status + '</td><td>' + Date2String( last_change ) + '</td></tr>';
                 table.innerHTML += html;
             }
         });
