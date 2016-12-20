@@ -11,14 +11,24 @@ import xml.etree.ElementTree as ET
 import AtomFeed
 
 def Ping( address ):
+    online = False
     try:
-        r = subprocess.run( ["ping6", "-W", "1", "-c", "1", address], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
-        return ( r.returncode == 0 )
+        r = subprocess.run( ["ping",  "-W", "1", "-c", "1", address], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
+        online = ( r.returncode == 0 )
     except:
-        return False
+        pass
+
+    if not online:
+        try:
+            r = subprocess.run( ["ping6", "-W", "1", "-c", "1", address], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
+            online = ( r.returncode == 0 )
+        except:
+            pass
+
+    return online
 
 
-def PingAll( hosts, feedFolder, url ):
+def PingAll( hosts_config, feedFolder, url ):
     feed_file = feedFolder + '_all.atom'
     feed = None
     if os.path.exists( feed_file ):
