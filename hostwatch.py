@@ -36,7 +36,7 @@ def PingAll( hosts_config, feedFolder, url ):
     else:
         feed = AtomFeed.AtomFeed( title='hostwatch: all', author='hostwatch', link=url, maxEntries=100 )
 
-    for host in hosts:
+    for host in hosts_config['hosts']:
         new_status = Ping( host['address'] )
         if new_status != host['online']:
             host['lastchange'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -66,13 +66,13 @@ def UpdateLocalFeed( name, online, feedFolder, url ):
 
 
 def ReadHosts( hostsJSON ):
-    hosts = None
+    hosts_config = None
     if os.path.exists( hostsJSON ):
         with open( hostsJSON, 'r' ) as f:
-            hosts = json.load( f )
+            hosts_config = json.load( f )
     else:
-        hosts = json.loads( '[{"lastchange": "2000-01-01T00:00:00Z", "online": false, "name": "localhost", "address": "127.0.0.1"}]' )
-    return hosts
+        hosts_config = json.loads( '{"updated": "2016-12-17T00:11:10Z", "hosts": [{"lastchange": "2000-01-01T00:00:00Z", "online": false, "name": "localhost", "address": "127.0.0.1"}]}' )
+    return hosts_config
 
 
 def WriteHosts( hosts, hostsJSON ):
