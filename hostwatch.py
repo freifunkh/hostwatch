@@ -76,6 +76,7 @@ def ReadHosts( hostsJSON ):
 
 
 def WriteHosts( hosts, hostsJSON ):
+    hosts['updated'] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     with open( hostsJSON, 'w' ) as f:
         json.dump( hosts, f )
 

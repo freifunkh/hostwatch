@@ -5,11 +5,14 @@
         <style type="text/css">
         .online  { background-color: #00FF00; }
         .offline { background-color: #FF0000; }
-        td { border-top: none; border-left: none; border-right: 1px solid #999999; border-bottom: 1px solid #999999; }
+        td { padding: 3px; border-top: 1px solid #999999; border-left: 1px solid #999999; border-right: none; border-bottom: none; }
+        #updated-div { font-size: 10pt; margin-top: 5px; }
         </style>
+        <link rel="alternate" type="application/atom+xml" title="hostwatch: all" href="var/_all.atom">
     </head>
     <body>
         <table id="host-table"></table>
+        <div id="updated-div"></div>
         <script src="script.js"></script>
     </body>
 </html>

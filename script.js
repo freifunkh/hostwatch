@@ -1,30 +1,39 @@
 const gHosts = "var/hosts.json"
 
-function Date2String( date )
+function Date2String( date, seconds=false )
 {
-    var month  = ( "0" + date.getMonth()   ).slice(-2);
-    var day    = ( "0" + date.getDate()    ).slice(-2);
-    var hour   = ( "0" + date.getHours()   ).slice(-2);
-    var minute = ( "0" + date.getMinutes() ).slice(-2);
-    return date.getFullYear() + '-' + month + '-' + day + ' ' + hour + ':' + minute;
+    var month  = ( "0" + (date.getMonth()+1) ).slice(-2);
+    var day    = ( "0" +  date.getDate()     ).slice(-2);
+    var hour   = ( "0" +  date.getHours()    ).slice(-2);
+    var minute = ( "0" +  date.getMinutes()  ).slice(-2);
+    ret = date.getFullYear() + '-' + month + '-' + day + ' ' + hour + ':' + minute;
+    if( seconds )
+    {
+        var second = ( "0" +  date.getSeconds() ).slice(-2);
+        ret += ':' + second;
+    }
+    return ret;
 }
 
 function LoadData()
 {
     d = new Date();
-    fetch( gHosts + "?d=" + d.getSeconds() ).then( function(response)
+    fetch( gHosts + "?d=" + d.getMilliseconds() ).then( function(response)
     {
-        response.json().then( function(data)
-        {  
+        return response.json().then( function(json)
+        {
             var table = document.getElementById( "host-table" );
             table.innerHTML = "<tr><th>Host</th><th>Status</th><th>Last change</th></tr>";
-            for( var i=0; i<data.length; ++i )
+            for( var i=0; i<json['hosts'].length; ++i )
             {
-                var status = data[i]['online'] ? "online" : "offline";
-                var last_change = new Date( data[i]['lastchange'] );
-                var html = '<tr><td>' + data[i]['name'] + '</td><td class="' + status + '">' + status + '</td><td>' + Date2String( last_change ) + '</td></tr>';
+                var status = json['hosts'][i]['online'] ? "online" : "offline";
+                var last_change = new Date( json['hosts'][i]['lastchange'] );
+                var html = '<tr><td>' + json['hosts'][i]['name'] + '</td><td class="' + status + '">' + status + '</td><td>' + Date2String( last_change ) + '</td></tr>';
                 table.innerHTML += html;
             }
+
+            var div = document.getElementById( "updated-div" );
+            div.innerHTML = "Last updated: " + Date2String( new Date( json['updated'] ) );
         });
     });
 }
